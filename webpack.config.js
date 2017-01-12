@@ -1,73 +1,64 @@
-const resolve = require('path').resolve;
-const webpack = require('webpack');
+'use strict';
+
+var path = require('path');
+var webpack = require('webpack');
+var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  entry: [
-    'react-hot-loader/patch',
-    // activate HMR for React
-
-    'webpack-dev-server/client?http://localhost:8080',
-    // bundle the client for webpack-dev-server
-    // and connect to the provided endpoint
-
-    'webpack/hot/only-dev-server',
-    // bundle the client for hot reloading
-    // only- means to only hot reload for successful updates
-
-
-    './index.js'
-    // the entry point of our app
-  ],
-  output: {
-    filename: 'bundle.js',
-    // the output bundle
-
-    path: resolve(__dirname, 'dist'),
-
-    publicPath: '/'
-    // necessary for HMR to know where to load the hot update chunks
-  },
-
-  context: resolve(__dirname, 'src'),
-
-  devtool: 'inline-source-map',
-
-  devServer: {
-    hot: true,
-    // enable HMR on the server
-
-    contentBase: resolve(__dirname, 'dist'),
-    // match the output path
-
-    publicPath: '/public'
-    // match the output `publicPath`
-  },
-
-  module: {
-    rules: [
-      {
-        test: /\.js$/,
-        use: [
-          'babel-loader',
-        ],
-        exclude: /node_modules/
-      },
-      {
-        test: /\.css$/,
-        use: [
-          'style-loader',
-          'css-loader?modules',
-          'postcss-loader',
-        ],
-      },
+    devtool: 'eval-source-map',
+    entry: [
+        'webpack-dev-server/client?http://localhost:3000',
+        'webpack/hot/only-dev-server',
+        'react-hot-loader/patch',
+        path.join(__dirname, 'src/index.js')
     ],
-  },
-
-  plugins: [
-    new webpack.HotModuleReplacementPlugin(),
-    // enable HMR globally
-
-    new webpack.NamedModulesPlugin(),
-    // prints more readable module names in the browser console on HMR updates
-  ],
+    output: {
+        path: path.join(__dirname, '/dist/'),
+        filename: '[name].js',
+        publicPath: '/'
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+          template: 'public/index.html',
+          inject: 'body',
+          filename: 'index.html'
+        }),
+        new webpack.optimize.OccurenceOrderPlugin(),
+        new webpack.HotModuleReplacementPlugin(),
+        new webpack.NoErrorsPlugin(),
+        new webpack.DefinePlugin({
+          'process.env.NODE_ENV': JSON.stringify('development')
+        })
+    ],
+    eslint: {
+        configFile: '.eslintrc',
+        failOnWarning: false,
+        failOnError: false
+    },
+    module: {
+        preLoaders: [
+            {
+                test: /\.js$/,
+                exclude: /node_modules/,
+                loader: 'eslint'
+            }
+        ],
+        loaders: [
+            {
+                test: /\.js?$/,
+                exclude: /node_modules/,
+                loader: 'babel'
+            },
+            {
+                test: /\.json?$/,
+                loader: 'json'
+            },
+            {
+                test: /\.scss$/,
+                loader: 'style!css?modules&localIdentName=[name]---[local]---[hash:base64:5]!sass'
+            },
+            { test: /\.woff(2)?(\?[a-z0-9#=&.]+)?$/, loader: 'url?limit=10000&mimetype=application/font-woff' },
+            { test: /\.(ttf|eot|svg)(\?[a-z0-9#=&.]+)?$/, loader: 'file' }
+        ]
+    }
 };
