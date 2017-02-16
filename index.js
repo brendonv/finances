@@ -5,9 +5,12 @@ const config = require("./config")[env];
 
 const bodyParser = require('body-parser');
 
-const webpackDevMiddleware = require("webpack-dev-middleware");
 const webpack = require("webpack");
+const webpackDevMiddleware = require("webpack-dev-middleware");
+var webpackHotMiddleware = require('webpack-hot-middleware')
 const webpackConfig = require("./webpack.config");
+
+const PORT = process.env.PORT || 3000;
 
 const app = express();
 
@@ -24,11 +27,10 @@ app.use(bodyParser.json());
 
 app.use(express.static('public'));
 
-var compiler = webpack(webpackConfig);
+const compiler = webpack(webpackConfig);
 
-app.use(webpackDevMiddleware(compiler, {
-  publicPath: "/public" // Same as `output.publicPath` in most cases.
-}));
+app.use(webpackDevMiddleware(compiler, { noInfo: true, publicPath: webpackConfig.output.publicPath }))
+app.use(webpackHotMiddleware(compiler))
 
 //ROUTES
 
@@ -74,6 +76,6 @@ app.post('/authenticate', (req, res) => {
 
 //LISTEN
 
-app.listen(3000, () => {
+app.listen(PORT, () => {
   console.log("App listening on 3000");
 });
