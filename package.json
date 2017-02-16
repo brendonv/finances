@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server",
+    "start": "node index",
     "build": "rimraf dist && webpack --config ./webpack.production.config.js --progress --profile --colors"
   },
   "repository": {
@@ -30,7 +30,8 @@
     "react-router": "^2.4.0",
     "react-router-redux": "^4.0.4",
     "redux": "^3.6.0",
-    "redux-thunk": "^2.1.0"
+    "redux-thunk": "^2.1.0",
+    "whatwg-fetch": "2.0.2"
   },
   "devDependencies": {
     "autoprefixer": "^6.3.6",
@@ -49,8 +50,8 @@
     "extract-text-webpack-plugin": "^1.0.1",
     "html-webpack-plugin": "^2.16.1",
     "json-loader": "^0.5.4",
-    "nodemon": "^1.11.0",
     "node-sass": "^3.7.0",
+    "nodemon": "^1.11.0",
     "postcss-loader": "^0.9.1",
     "react-addons-test-utils": "^15.0.2",
     "react-hot-loader": "^3.0.0-beta.6",
@@ -64,6 +65,7 @@
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
     "webpack": "^1.13.0",
-    "webpack-dev-server": "^1.14.1"
+    "webpack-dev-server": "^1.14.1",
+    "webpack-hot-middleware": "2.15.0"
   }
 }
