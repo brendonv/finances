@@ -1,11 +1,35 @@
-// ./src/components/App.js
-import React from 'react';
-// import { connect } from 'react-redux';
+import React, { Component, PropTypes } from 'react';
+import { connect } from 'react-redux';
+import Signup from '../components/Signup';
 
-const App = () => (
-  <div>
-    <h2>Hello, </h2>
-  </div>
-);
+class App extends Component {
+    static propTypes = {
+        isLoggedIn: PropTypes.bool.isRequired
+    }
 
-export default App;
+    componentDidMount() {
+
+    }
+
+    componentWillReceiveProps() {
+
+    }
+
+    render() {
+        return (
+        );
+    }
+
+}
+
+const mapStateToProps = state => {
+    const { isLoggedIn } = state;
+
+    return {
+        isLoggedIn
+    };
+};
+
+
+
+export default connect(mapStateToProps)(App);
