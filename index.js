@@ -1,13 +1,16 @@
 const express = require('express');
+const mongoose = require('mongoose');
+mongoose.promise = require("bluebird");
 const plaid = require('plaid');
 const env = process.env.env || "DEV";
 const config = require("./config")[env];
+const morgan = require("morgan");
 
 const bodyParser = require('body-parser');
 
 const webpack = require("webpack");
 const webpackDevMiddleware = require("webpack-dev-middleware");
-var webpackHotMiddleware = require('webpack-hot-middleware')
+const webpackHotMiddleware = require('webpack-hot-middleware');
 const webpackConfig = require("./webpack.config");
 
 const PORT = process.env.PORT || 3000;
@@ -26,52 +29,100 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use(express.static('public'));
-
+// app.use(express.static('dist'));
 const compiler = webpack(webpackConfig);
 
-app.use(webpackDevMiddleware(compiler, { noInfo: true, publicPath: webpackConfig.output.publicPath }))
-app.use(webpackHotMiddleware(compiler))
+app.use(webpackDevMiddleware(compiler, { noInfo: true, publicPath: webpackConfig.output.publicPath }));
+app.use(webpackHotMiddleware(compiler));
+
+app.use(morgan('tiny'));
+
+/*
+ * Mongoose DB connection
+ */
+
+mongoose.connect(config.mongoDB);
+const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', (cb) => {
+    console.log("successfully opened");
+});
+
+require('./models/account');
+require('./models/category');
+require('./models/transaction');
+require('./models/user');
+
+const Account = mongoose.model('Account');
+const Category = mongoose.model('Category');
+const Transaction = mongoose.model('Transaction');
+const User = mongoose.model('User');
+
+const categories = require('./routes/categories');
+const transactions = require('./routes/transactions');
+const users = require('./routes/users');
 
 //ROUTES
 
 app.get('/', (req, res) => {
-  console.log(__dirname);
-  res.sendFile(__dirname + "/index.html");
+    return res.sendFile(__dirname + "/public/index.html");
 });
 
-app.post('/authenticate', (req, res) => {
-  const public_token = req.body.public_token;
+app.post('/checkauth', (req, res) => {
+    //TODO: actually check auth
+    return res.status(401).json({error: "Not logged in"});
+});
 
-  console.log("Public token: ", public_token);
+app.get('/categories', categories.getAll);
+app.post('/categories', categories.save);
+app.put('/categories', categories.update);
+// app.delete('/categories', categories.update);
+app.get('/categories/:categoryId', categories.get);
 
-  // Exchange a public_token for a Plaid access_token
-  plaidClient.exchangeToken(public_token, (err, exchangeTokenRes) => {
-    if (err != null) {
-      // Handle error!
-    } else {
-      // This is your Plaid access token - store somewhere persistent
-      // The access_token can be used to make Plaid API calls to
-      // retrieve accounts and transactions
-      const access_token = exchangeTokenRes.access_token;
 
-      console.log("Access token:", access_token);
+app.get('/user/:userId', users.get);
+app.put('/user/:userId', users.update);
+app.get('/user/:userId/transactions', transactions.getAll);
+app.get('/user/:userId/transactions/:accountId', transactions.getAll);
+app.post('/user/:userId/transactions', transactions.save);
+app.get('/user/:userId/transactions/:transactionId', transactions.get);
+app.put('/user/:userId/transactions/:transactionId', transactions.update);
+// app.delete('/:userId/transactions/:transactionId', transactions.update);
 
-      plaidClient.getAuthUser(access_token, (err, authRes) => {
-        if (err != null) {
-          // Handle error!
-        } else {
-          // An array of accounts for this user, containing account
-          // names, balances, and account and routing numbers.
-          var accounts = authRes.accounts;
+app.param('categoryId', (req, res, next, id) => {
+    Category.findOne(id).then(data => {
+        req.category = data;
+        next();
+    }).catch(error => {
+        next(error);
+    });
+});
 
-          console.log("Authorized accounts:", accounts);
+app.param('userId', (req, res, next, id) => {
+    User.findOne(id).then(data => {
+        req.user = data;
+        next();
+    }).catch(error => {
+        next(error);
+    });
+});
 
-          // Return account data
-          res.json({accounts});
-        }
-      });
-    }
-  });
+app.param('transactionId', (req, res, next, id) => {
+    Transaction.findOne(id).then(data => {
+        req.transaction = data;
+        next();
+    }).catch(error => {
+        next(error);
+    });
+});
+
+app.param('accountId', (req, res, next, id) => {
+    Account.findOne(id).then(data => {
+        req.account = data;
+        next();
+    }).catch(error => {
+        next(error);
+    });
 });
 
 //LISTEN
