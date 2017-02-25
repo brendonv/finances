@@ -1,13 +1,13 @@
 import React, { PropTypes } from 'react';
 
-const Signup = ({ onChange }) => (
+const Signup = ({ onSignupClick }) => (
     <div>
-        <button className="plaid signup" onClick="onChange()"></button>
+        <button className="plaid signup" onClick="onSignupClick()"></button>
     </div>
 );
 
 Signup.propTypes = {
-    onChange: PropTypes.func.isRequired
+    onSignupClick: PropTypes.func.isRequired
 };
 
 export default Signup;
