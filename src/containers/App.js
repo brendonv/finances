@@ -1,14 +1,18 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
+import { checkAuth } from '../actions';
 import Signup from '../components/Signup';
 
 class App extends Component {
     static propTypes = {
-        isLoggedIn: PropTypes.bool.isRequired
+        loggedIn: PropTypes.bool.isRequired,
+        isFetching: PropTypes.bool.isRequired
     }
 
     componentDidMount() {
-
+        if (this.props.loggedIn && !this.props.isFetching) {
+            dispatch(checkAuth());
+        }
     }
 
     componentWillReceiveProps() {
@@ -17,16 +21,24 @@ class App extends Component {
 
     render() {
         return (
+            <div> Hi there! </div>
         );
     }
 
 }
 
 const mapStateToProps = state => {
-    const { isLoggedIn } = state;
+    console.log("APP: mapStateToProps", state);
+    const { auth, data } = state;
+
+    const  {
+        loggedIn,
+        isFetching
+    } = auth;
 
     return {
-        isLoggedIn
+        loggedIn,
+        isFetching
     };
 };
 
