@@ -1,5 +1,6 @@
-var path = require('path')
-var webpack = require('webpack')
+const path = require('path');
+const webpack = require('webpack');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
   devtool: 'cheap-module-eval-source-map',
@@ -19,6 +20,9 @@ module.exports = {
     new webpack.DefinePlugin({
       PORT: JSON.stringify(process.env.PORT) || 5000, 
       URL: JSON.stringify(process.env.url) || JSON.stringify("http://localhost:" + (process.env.PORT || 5000))
+    }),
+    new ExtractTextPlugin('index.css', {
+      allChunks: true
     })
   ],
   module: {
@@ -27,6 +31,9 @@ module.exports = {
       loaders: ['babel'],
       exclude: /node_modules/,
       include: __dirname
+    }, {
+      test: [/\.scss$/, /\.sass$/],
+      loader: ExtractTextPlugin.extract('css!sass')
     }]
   }
 }
