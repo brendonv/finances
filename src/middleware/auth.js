@@ -1,5 +1,1 @@
-export default store => next => action => {
-
-    console.log("auth middleware");
-
-};
+export default store => next => action => next(action);
