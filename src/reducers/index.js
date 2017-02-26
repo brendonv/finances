@@ -1,24 +1,26 @@
 import * as ActionTypes from '../constants/actionTypes';
 import { combineReducers } from 'redux';
 
-const authInitialState = { loggedIn: false, isFetching: false };
+const authInitialState = { isFetching: false };
 const dataInitialState = { isFetching: false, data: [] };
 
 const auth = (state = authInitialState, action) => {
 	switch (action.type) {
-		case ActionTypes.CHECK_AUTH:
+		case ActionTypes.AUTH_REQUEST:
 			return {
 				...state,
 				isFetching: true
 			};
-		case ActionTypes.RECEIVED_AUTH:
+		case ActionTypes.AUTH_SUCCESS:
 			return {
 				...state,
+				loggedIn: true,
 				isFetching: false
 			};
-		case ActionTypes.ERROR_AUTH:
+		case ActionTypes.AUTH_FAILED:
 			return {
 				...state,
+				loggedIn: false,
 				isFetching: false
 			};
 		case ActionTypes.LOGIN:
