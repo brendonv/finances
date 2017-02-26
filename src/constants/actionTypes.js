@@ -2,9 +2,9 @@ export const SIGNUP = "SIGNUP";
 
 export const LOGIN = "LOGIN";
 
-export const CHECK_AUTH = "CHECK_AUTH";
-export const RECEIVED_AUTH = "RECEIVED_AUTH";
-export const ERROR_AUTH = "ERROR_AUTH";
+export const AUTH_REQUEST = "AUTH_REQUEST";
+export const AUTH_SUCCESS = "AUTH_SUCCESS";
+export const AUTH_FAILED = "AUTH_FAILED";
 
 export const CHECK_LOGIN = "CHECK_LOGIN";
 export const RECEIVED_LOGIN = "RECEIVED_LOGIN";
