@@ -21,7 +21,7 @@ const store = createStore(
   applyMiddleware(...middleware)
 );
 
-store.dispatch(checkAuth());
+// store.dispatch(checkAuth());
 
 render(
   <Provider store={store}>
