@@ -1,16 +1,16 @@
 import * as types from '../constants/actionTypes';
 import { API } from '../constants/config';
 
-export const requestAuth = () => ({
-	type: types.CHECK_AUTH
+export const authRequest = () => ({
+	type: types.AUTH_REQUEST
 });
 
-export const receivedAuth = () => ({
-	type: types.RECEIVED_AUTH
+export const authSuccess = () => ({
+	type: types.AUTH_SUCCESS
 });
 
-export const errorAuth = () => ({
-	type: types.ERROR_AUTH
+export const authFailed = () => ({
+	type: types.AUTH_FAILED
 });
 
 export const requestLogin = () => ({
@@ -38,7 +38,7 @@ export const errorSignup = () => ({
 });
 
 export const checkAuth = () => dispatch => {
-    dispatch(requestAuth());
+    dispatch(authRequest());
     return fetch('/checkauth', { method: 'POST' })
     	.then(response => {
     		if (!response.ok) {
@@ -48,12 +48,12 @@ export const checkAuth = () => dispatch => {
     	})
     	.then(json => {
     		console.log("checkauth json", json);
-    		return dispatch(receivePosts(reddit, json));
+    		return dispatch(authSuccess());
     	})
     	.catch(response => {
     		console.log("ERROR", response);
     		if (response.status === 401) {
-    			return dispatch()
+    			return dispatch(authFailed());
     		}
     		//handle error
     	})
