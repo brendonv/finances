@@ -14,4 +14,5 @@ export const CHECK_SIGNUP = "CHECK_SIGNUP";
 export const RECEIVED_SIGNUP = "RECEIVED_SIGNUP";
 export const ERROR_SIGNUP = "ERROR_SIGNUP";
 
-export const GET_BANK_DATA = "GET_BANK_DATA";
+export const GET_DATA = "GET DATA";
+export const GET_TRANSACTIONS = "GET_TRANSACTIONS";

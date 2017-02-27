@@ -1,7 +1,7 @@
 import * as ActionTypes from '../constants/actionTypes';
 import { combineReducers } from 'redux';
 
-const authInitialState = { isFetching: false };
+const authInitialState = { isFetching: false, loggedIn: false };
 const dataInitialState = { isFetching: false, data: [] };
 
 const auth = (state = authInitialState, action) => {
@@ -35,7 +35,7 @@ const auth = (state = authInitialState, action) => {
 
 const data = (state = dataInitialState, action) => {
 	switch (action.type) {
-		case ActionTypes.GET_BANK_DATA:
+		case ActionTypes.GET_TRANSACTIONS:
 			return {
 				...state,
 				isFetching: true

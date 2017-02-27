@@ -37,6 +37,14 @@ export const errorSignup = () => ({
 	type: types.ERROR_SIGNUP
 });
 
+export const transactionRequest = () => ({
+    type: types.GET_TRANSACTIONS
+});
+
+export const getData = () => ({
+    type: types.GET_DATA
+});
+
 export const checkAuth = () => dispatch => {
     dispatch(authRequest());
     return fetch('/checkauth', { method: 'POST' })
@@ -44,18 +52,19 @@ export const checkAuth = () => dispatch => {
     		if (!response.ok) {
     			return Promise.reject(response);
     		}
-    		return response;
+    		return response.json();
     	})
     	.then(json => {
     		console.log("checkauth json", json);
-    		return dispatch(authSuccess());
+            if (!json.user) {
+                return Promise.reject()
+            }
+    		dispatch(authSuccess());
+            return dispatch(getTransactions(json.user));
     	})
     	.catch(response => {
     		console.log("ERROR", response);
-    		if (response.status === 401) {
-    			return dispatch(authFailed());
-    		}
-    		//handle error
+			return dispatch(authFailed());
     	})
 };
 
@@ -66,7 +75,7 @@ export const login = () => dispatch => {
     		if (!response.ok) {
     			return Promise.reject(response);
     		}
-    		return response;
+    		return response.json();
     	})
     	.then(json => {
     		console.log("checkauth json", json);
@@ -88,7 +97,7 @@ export const signup = () => dispatch => {
     		if (!response.ok) {
     			return Promise.reject(response);
     		}
-    		return response;
+    		return response.json();
     	})
     	.then(json => {
     		console.log("checkauth json", json);
@@ -102,3 +111,10 @@ export const signup = () => dispatch => {
     		//handle error
     	})
 };
+
+export const getTransactions = user => dispatch => {
+    dispatch(transactionRequest());
+    console.log(user);
+    return;
+    return fetch('/')
+}

@@ -13,15 +13,14 @@ class App extends Component {
     }
 
     componentDidMount() {
-        console.log("COMPONENT DID MOUNT", this.props);
         if (!this.props.loggedIn && !this.props.isFetching) {
             this.props.dispatch(checkAuth());
+        } else if (this.props.loggedIn) {
+            console.log("LOGGED IN");
         }
     }
 
     componentWillReceiveProps() {
-        console.log("COMPONENTWILLRECEIVEPROPS");
-        console.log(this.props);
     }
 
     render() {
@@ -41,15 +40,15 @@ class App extends Component {
 }
 
 const mapStateToProps = state => {
-    console.log("APP: mapStateToProps", state);
     const { auth } = state;
 
     const  {
-        isFetching
+        isFetching,
+        loggedIn
     } = auth;
 
     return {
-        loggedIn: false,
+        loggedIn,
         isFetching
     };
 };

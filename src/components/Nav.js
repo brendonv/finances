@@ -6,11 +6,9 @@ class Nav extends Component {
     }
 
     componentDidMount() {
-        console.log("COMPONENT DID MOUNT", this.props);
     }
 
     componentWillReceiveProps() {
-        console.log("COMPONENTWILLRECEIVEPROPS");
     }
 
     render() {

@@ -5,12 +5,13 @@ class Finance extends Component {
     static propTypes = {
     }
 
+    componentWillMount() {
+    }
+
     componentDidMount() {
-        console.log("COMPONENT DID MOUNT", this.props);
     }
 
     componentWillReceiveProps() {
-        console.log("COMPONENTWILLRECEIVEPROPS");
     }
 
     render() {
@@ -24,7 +25,6 @@ class Finance extends Component {
 }
 
 const mapStateToProps = state => {
-    console.log("Finance: mapStateToProps", state);
     const { auth } = state;
 
     const  {
