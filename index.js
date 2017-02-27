@@ -1,4 +1,6 @@
 const express = require('express');
+const https = require('https');
+const fs = require('fs');
 const mongoose = require('mongoose');
 mongoose.promise = require("bluebird");
 const plaid = require('plaid');
@@ -68,10 +70,9 @@ app.get('/', (req, res) => {
     return res.sendFile(__dirname + "/public/index.html");
 });
 
-app.post('/checkauth', (req, res) => {
-    //TODO: actually check auth
-    return res.status(401).json({error: "Not logged in"});
-});
+app.post('/checkauth', users.get);
+
+app.post('/signup', users.create);
 
 app.get('/categories', categories.getAll);
 app.post('/categories', categories.save);
@@ -124,9 +125,12 @@ app.param('accountId', (req, res, next, id) => {
         next(error);
     });
 });
-
+console.log(__dirname)
 //LISTEN
-
-app.listen(PORT, () => {
-  console.log("App listening on 3000");
-});
+https.createServer({
+    key: fs.readFileSync('finance_key.pem'),
+    cert: fs.readFileSync('finance_cert.pem')
+}, app).listen(3000);
+// app.listen(PORT, () => {
+//   console.log("App listening on 3000");
+// });
