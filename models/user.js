@@ -3,7 +3,7 @@ const Schema   = mongoose.Schema;
 
 
 const userSchema = new Schema({
-	name: String,
+	name: { type:String, required: true, unique: true },
 	access_token: String
 });
 
