@@ -10,3 +10,6 @@ npm-debug.log
 
 dist/
 config.js
+
+finance_key.pem
+finance_cert.pem
