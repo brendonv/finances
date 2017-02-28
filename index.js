@@ -83,6 +83,7 @@ app.get('/categories/:categoryId', categories.get);
 
 app.get('/user/:userId', users.get);
 app.put('/user/:userId', users.update);
+app.post('/user/:userId/link', users.link);
 app.get('/user/:userId/transactions', transactions.getAll);
 app.get('/user/:userId/transactions/:accountId', transactions.getAll);
 app.post('/user/:userId/transactions', transactions.save);
@@ -91,7 +92,7 @@ app.put('/user/:userId/transactions/:transactionId', transactions.update);
 // app.delete('/:userId/transactions/:transactionId', transactions.update);
 
 app.param('categoryId', (req, res, next, id) => {
-    Category.findOne(id).then(data => {
+    Category.findById(id).then(data => {
         req.category = data;
         next();
     }).catch(error => {
@@ -100,7 +101,7 @@ app.param('categoryId', (req, res, next, id) => {
 });
 
 app.param('userId', (req, res, next, id) => {
-    User.findOne(id).then(data => {
+    User.findById(id).then(data => {
         req.user = data;
         next();
     }).catch(error => {
@@ -109,7 +110,7 @@ app.param('userId', (req, res, next, id) => {
 });
 
 app.param('transactionId', (req, res, next, id) => {
-    Transaction.findOne(id).then(data => {
+    Transaction.findById(id).then(data => {
         req.transaction = data;
         next();
     }).catch(error => {
@@ -118,7 +119,7 @@ app.param('transactionId', (req, res, next, id) => {
 });
 
 app.param('accountId', (req, res, next, id) => {
-    Account.findOne(id).then(data => {
+    Account.findById(id).then(data => {
         req.account = data;
         next();
     }).catch(error => {
@@ -127,10 +128,13 @@ app.param('accountId', (req, res, next, id) => {
 });
 console.log(__dirname)
 //LISTEN
-https.createServer({
-    key: fs.readFileSync('finance_key.pem'),
-    cert: fs.readFileSync('finance_cert.pem')
-}, app).listen(3000);
-// app.listen(PORT, () => {
-//   console.log("App listening on 3000");
-// });
+try {
+    https.createServer({
+        key: fs.readFileSync('finance_key.pem'),
+        cert: fs.readFileSync('finance_cert.pem')
+    }, app).listen(3000);
+} catch (error) {
+    app.listen(PORT, () => {
+      console.log("App listening on 3000");
+    });
+}
