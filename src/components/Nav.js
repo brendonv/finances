@@ -3,6 +3,8 @@ import { connect } from 'react-redux';
 
 class Nav extends Component {
     static propTypes = {
+        user: PropTypes.object,
+        loggedIn: PropTypes.bool.isRequired
     }
 
     componentDidMount() {
@@ -12,9 +14,13 @@ class Nav extends Component {
     }
 
     render() {
+        const name = this.props.user && this.props.user.name;
         return (
             <div className="nav">
-                Nav bar
+                { this.props.loggedIn &&
+                    <div>{name}</div>
+                }
+
             </div>
         );
     }
@@ -22,8 +28,15 @@ class Nav extends Component {
 }
 
 const mapStateToProps = state => {
+    const { auth, user } = state;
+
+    const  {
+        loggedIn
+    } = auth;
 
     return {
+        loggedIn,
+        user
     };
 };
 
