@@ -14,5 +14,12 @@ export const CHECK_SIGNUP = "CHECK_SIGNUP";
 export const RECEIVED_SIGNUP = "RECEIVED_SIGNUP";
 export const ERROR_SIGNUP = "ERROR_SIGNUP";
 
+export const SET_USER = "SET_USER";
+export const SET_ACCOUNTS = "SET_ACCOUNTS";
+
+export const LINK_ACCOUNT = "LINK_ACCOUNT";
+export const LINK_ACCOUNT_REQUEST = "LINK_ACCOUNT_REQUEST";
+export const LINK_SUCCESS = "LINK_SUCCESS";
+
 export const GET_DATA = "GET DATA";
 export const GET_TRANSACTIONS = "GET_TRANSACTIONS";

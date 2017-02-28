@@ -2,7 +2,8 @@ import * as ActionTypes from '../constants/actionTypes';
 import { combineReducers } from 'redux';
 
 const authInitialState = { isFetching: false, loggedIn: false };
-const dataInitialState = { isFetching: false, data: [] };
+const transactionsInitialState = { isFetching: false, data: [] };
+const userInitialState = { link: false };
 
 const auth = (state = authInitialState, action) => {
 	switch (action.type) {
@@ -33,7 +34,7 @@ const auth = (state = authInitialState, action) => {
 	}
 };
 
-const data = (state = dataInitialState, action) => {
+const transactions = (state = transactionsInitialState, action) => {
 	switch (action.type) {
 		case ActionTypes.GET_TRANSACTIONS:
 			return {
@@ -45,9 +46,32 @@ const data = (state = dataInitialState, action) => {
 	}
 };
 
+const user = (state = userInitialState, action) => {
+	switch (action.type) {
+		case ActionTypes.SET_USER:
+			return {
+				...state,
+				...action.user
+			};
+		case ActionTypes.SET_ACCOUNTS:
+			return {
+				...state,
+				...action.accounts
+			};
+		case ActionTypes.LINK_ACCOUNT:
+			return {
+				...state,
+				link: true
+			};
+		default:
+			return state;
+	}
+};
+
 const rootReducer = combineReducers({
 	auth,
-    data
+    transactions,
+    user
 });
 
 export default rootReducer;

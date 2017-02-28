@@ -1,8 +1,11 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
+import Link from '../components/Link';
 
 class Finance extends Component {
     static propTypes = {
+        link: PropTypes.bool.isRequired,
+        isFetching: PropTypes.bool.isRequired
     }
 
     componentWillMount() {
@@ -14,10 +17,15 @@ class Finance extends Component {
     componentWillReceiveProps() {
     }
 
+    linkAccount(e) {
+        e.preventDefault()
+        console.log("### Link account", e);
+    }
+
     render() {
         return (
             <div>
-                Finance!
+                {this.props.link && <Link onLinkClick={this.linkAccount} /> }
             </div>
         );
     }
@@ -25,14 +33,18 @@ class Finance extends Component {
 }
 
 const mapStateToProps = state => {
-    const { auth } = state;
+    const { user, transactions } = state;
 
-    const  {
+    const {
+        link
+    } = user;
+
+    const {
         isFetching
-    } = auth;
+    } = transactions;
 
     return {
-        loggedIn: false,
+        link,
         isFetching
     };
 };
