@@ -1,10 +1,18 @@
 import React, { Component, PropTypes } from 'react';;
 import { connect } from 'react-redux';
-import { linkAccount } from '../actions';
+import { postLinkAccount } from '../actions';
 
 class Link extends Component {
     static propTypes = {
         user: PropTypes.object.isRequired,
+        dispatch: PropTypes.func.isRequired
+    }
+
+    constructor(props) {
+    	super(props);
+    	this.state = { username: '', password: '' };
+	    this.handleChange = this.handleChange.bind(this);
+	    this.handleSubmit = this.handleSubmit.bind(this);
     }
 
     componentDidMount() {
@@ -13,22 +21,38 @@ class Link extends Component {
     componentWillReceiveProps() {
     }
 
+    handleChange(e) {
+    	const name = e.target.name;
+    	const value = e.target.value;
+    	this.setState({
+		  [name]: value
+		});
+    }
+
+    handleSubmit(e) {
+    	const { dispatch, user } = this.props;
+		e.preventDefault();
+        
+        if (!this.state.username.trim() || !this.state.password.trim()) {
+          return;
+        }
+        
+        dispatch(postLinkAccount(user, this.state));
+        
+        this.setState({
+        	username: '',
+        	password: ''
+        });    	
+    }
+
     render() {
-    	let username, password;
+
     	return (
 			<div className="overlay">
-				<form onSubmit={ e => {
-					e.preventDefault();
-			        // if (!input.value.trim()) {
-			        //   return;
-			        // }
-			        console.log(username, password);
-			        // dispatch(linkAccount({input}.value));
-			        // input.value = '';
-				}}>
+				<form onSubmit={this.handleSubmit}>
 				    <div className="link-input">
-				    	<input value={username} placeholder="Bank username" />
-				    	<input value={password} placeholder="Bank password" />
+				    	<input name="username" value={this.state.username} placeholder="Bank username" onChange={this.handleChange} />
+				    	<input name="password" value={this.state.password} placeholder="Bank password" onChange={this.handleChange} type="password" />
 				    	<button className="link"> Link to bank account </button>
 				    </div>
 				</form>
@@ -39,7 +63,7 @@ class Link extends Component {
 
 const mapStateToProps = state => {
 	const { user } = state;
-	return user;
+	return { user };
 };
 
 export default connect(mapStateToProps)(Link);
