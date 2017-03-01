@@ -158,10 +158,13 @@ export const postLinkAccount = (user, data) => dispatch => {
     dispatch(linkAccountRequest());
     return fetch(`user/${user._id}/link`, {
             method: 'POST',
-            body: {
-                username: "foo",
-                password: "bar"
-            }
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: data.username,
+                password: data.password
+            })
         })
         .then(response => {
             if (!response.ok) {
