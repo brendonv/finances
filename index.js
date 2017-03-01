@@ -2,8 +2,7 @@ const express = require('express');
 const https = require('https');
 const fs = require('fs');
 const mongoose = require('mongoose');
-mongoose.promise = require("bluebird");
-const plaid = require('plaid');
+mongoose.Promise = require("bluebird");
 const env = process.env.env || "DEV";
 const config = require("./config")[env];
 const morgan = require("morgan");
@@ -18,10 +17,6 @@ const webpackConfig = require("./webpack.config");
 const PORT = process.env.PORT || 3000;
 
 const app = express();
-
-const plaidClient = new plaid.Client(config.PLAID_CLIENT_ID || process.env.PLAID_CLIENT_ID,
-                                   config.PLAID_SECRET || process.env.PLAID_SECRET,
-                                   plaid.environments.tartan);
 
 //MIDDLEWARE
 
