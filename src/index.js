@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 import createLogger from 'redux-logger';
 import { checkAuth } from './actions';
-import reducer from './reducers';
+import reducer from './reducers/reducer';
 import auth from './middleware/auth';
 import App from './containers/App';
 import 'whatwg-fetch';
@@ -14,7 +14,7 @@ import 'whatwg-fetch';
 const middleware = [ thunk, auth ];
 if (process.env.NODE_ENV !== 'production') {
 	console.log("Push logger");
-    middleware.push(createLogger());
+    // middleware.push(createLogger());
 }
 
 const store = createStore(
