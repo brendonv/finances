@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { checkAuth } from '../actions';
+import { checkAuth } from '../reducers/auth';
 import Signup from '../components/Signup';
 import Nav from '../components/Nav';
 import Finance from '../containers/Finance';

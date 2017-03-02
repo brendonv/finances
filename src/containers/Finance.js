@@ -4,7 +4,7 @@ import Link from '../components/Link';
 
 class Finance extends Component {
     static propTypes = {
-        link: PropTypes.bool.isRequired,
+        // link: PropTypes.bool.isRequired,
         isFetching: PropTypes.bool.isRequired
     }
 
@@ -33,18 +33,18 @@ class Finance extends Component {
 }
 
 const mapStateToProps = state => {
-    const { user, transactions } = state;
+    const { auth, transactions } = state;
 
     const {
         link
-    } = user;
+    } = auth;
 
     const {
         isFetching
     } = transactions;
 
     return {
-        link,
+        // link,
         isFetching
     };
 };
