@@ -28,10 +28,11 @@ class Nav extends Component {
 }
 
 const mapStateToProps = state => {
-    const { auth, user } = state;
+    const { auth } = state;
 
     const  {
-        loggedIn
+        loggedIn,
+        user
     } = auth;
 
     return {

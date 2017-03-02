@@ -62,7 +62,8 @@ class Link extends Component {
 };
 
 const mapStateToProps = state => {
-	const { user } = state;
+	const { auth } = state;
+    const { user } = auth;
 	return { user };
 };
 
