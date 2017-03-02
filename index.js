@@ -42,7 +42,7 @@ mongoose.connect(config.mongoDB);
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', (cb) => {
-    console.log("successfully opened");
+    console.log("successfully opened mongodb connection");
 });
 
 require('./models/account');
@@ -121,7 +121,7 @@ app.param('accountId', (req, res, next, id) => {
         next(error);
     });
 });
-console.log(__dirname)
+
 //LISTEN
 try {
     https.createServer({
