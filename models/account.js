@@ -3,9 +3,9 @@ const Schema   = mongoose.Schema;
 
 
 const accountSchema = new Schema({
-	//Override _id with plaid _id
+	number: { type: String, required: true },
+	name: { type: String, required: true },
 	user: { type: Schema.Types.ObjectId, ref: 'User' },
-	name: String,
 	balance: {
 		available: Number,
 		current: Number
@@ -16,6 +16,7 @@ const accountSchema = new Schema({
 });
 
 accountSchema.index({ property_type: 1, region: 1 });
+accountSchema.index({ number: 1, name: 1 });
 
 const Account = mongoose.model('Account', accountSchema);
 module.exports = Account;
