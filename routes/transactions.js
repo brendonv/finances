@@ -13,9 +13,11 @@ exports.getAll = (req, res) => {
 	let account;
 	if (req.account) {
 		
-		Transaction.find({ account: req.account }).lean().exec().then(data => {
-
-		}).catch(error => {
+		Transaction.find({ account: req.account }).lean().exec()
+		.then(data => {
+			res.json({ transactions: data });
+		})
+		.catch(error => {
 			res.status(500).json({ message: error});
 		});
 
@@ -23,15 +25,22 @@ exports.getAll = (req, res) => {
 
 		if (!req.user) return res.status(400).json({message: "Include user id."});
 
-		Account.find({ user: req.user._id }).then(data => {
-			if (!data || !data.accounts && !data.accounts.length) {
-				Promise.reject("Unable to locate accounts on user");
+		Account.find({ user: req.user._id })
+		.then(data => {
+			if (data.length === 0) {
+				return Promise.reject("No accounts found.");
 			}
 
-			return Promise.map(data.accounts, account => {
+			return Promise.map(data, account => {
 				return Transaction.find({ account: account }).lean().exec();
 			});
-		}).catch(error => {
+		})
+		.reduce((transactions, data) => transactions.concat(data), [])
+		.then(data => {
+			return res.json({ transactions: data });
+		})
+		.catch(error => {
+			console.log("ERROR: transactions.getAll", error);
 			res.status(500).json({ message: error});
 		});
 	}
