@@ -9,6 +9,7 @@ const LINK_ACCOUNT_REQUEST = "finances/LINK_ACCOUNT_REQUEST";
 const LINK_ACCOUNT_SUCCESS = "finances/LINK_ACCOUNT_SUCCESS";
 const LINK_ACCOUNT_FAILURE = "finances/LINK_ACCOUNT_FAILURE";
 const SET_ACCOUNTS = "finances/SET_ACCOUNTS";
+const UPDATE_ACCOUNT = "finances/UPDATE_ACCOUNT";
 
  /**
  * ACTION CREATORS
@@ -29,6 +30,18 @@ export const linkAccountFailure = () => ({
 export const setAccounts = accounts => ({
 	type: SET_ACCOUNTS,
 	accounts
+});
+
+export const updateAccount = () => ({
+    type: UPDATE_ACCOUNT,
+});
+
+export const updateAccountSuccess = () => ({
+    type: UPDATE_ACCOUNT_SUCCESS,
+});
+
+export const updateAccountError = () => ({
+    type: UPDATE_ACCOUNT_ERROR,
 });
 
 export const postLinkAccount = (user, data) => dispatch => {
@@ -56,6 +69,32 @@ export const postLinkAccount = (user, data) => dispatch => {
         })
         .catch(response => {
             console.log("ERROR: postLinkAccount", response);
+            //////
+        });
+};
+
+export const updateAccountRequest = (user, date) => dispatch => {
+    dispatch(updateAccount);
+    return fetch(`user/${user._id}/update`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                date: date
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return Promise.reject(response);
+            }
+            return response.json();
+        })
+        .then(json => {
+            console.log("updateAccountRequest json", json);
+            dispatch(updateAccountSuccess());
+            return dispatch(getTransactions(user));
+        })
+        .catch(response => {
+            console.log("ERROR: postLinkAccount", response);
+            dispatch(updateAccountError());
             //////
         });
 };
@@ -88,8 +127,14 @@ export default function reducer(state = accountsInitialState, action) {
 		case SET_ACCOUNTS:
 			return {
 				...state,
-				acounts: action.accounts
+                linked: true,
+				accounts: action.accounts
 			};
+        case UPDATE_ACCOUNT: 
+            return {
+                ...state,
+                isFetching: true
+            }
 		default:
 			return state;
 	}
