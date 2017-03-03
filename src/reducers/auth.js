@@ -38,17 +38,17 @@ export const checkAuth = () => dispatch => {
         })
         .then(json => {
             let { user, accounts } = json;
-            
-            accounts = accounts.reduce((acc, account) => {
-                acc.accounts[account.name] = account;
+
+            const mappedAccounts = accounts.reduce((acc, account) => {
+                acc[account.name] = account;
                 return acc;
-            }, { accounts : {} });
-            
+            }, {});
+
             if (!json.user) {
                 return Promise.reject();
             }
             
-            dispatch(setAccounts(accounts));
+            dispatch(setAccounts(mappedAccounts));
             dispatch(authSuccess(user));
             return dispatch(getTransactions(user));
         })
