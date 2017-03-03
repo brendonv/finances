@@ -79,6 +79,7 @@ app.get('/categories/:categoryId', categories.get);
 app.get('/user/:userId', users.get);
 app.put('/user/:userId', users.update);
 app.post('/user/:userId/link', users.link);
+app.put('/user/:userId/update', users.updatePlaidAccount);
 app.get('/user/:userId/transactions', transactions.getAll);
 app.get('/user/:userId/transactions/:accountId', transactions.getAll);
 app.post('/user/:userId/transactions', transactions.save);
