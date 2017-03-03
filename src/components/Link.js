@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';;
 import { connect } from 'react-redux';
-import { postLinkAccount } from '../actions';
+import { postLinkAccount } from '../reducers/accounts';
 
 class Link extends Component {
     static propTypes = {
