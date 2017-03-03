@@ -1,11 +1,16 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import Link from '../components/Link';
+import Transactions from '../components/Transactions';
+import { updateAccountRequest } from '../reducers/accounts';
 
 class Finance extends Component {
     static propTypes = {
-        // link: PropTypes.bool.isRequired,
-        isFetching: PropTypes.bool.isRequired
+        linked: PropTypes.bool.isRequired,
+        isFetching: PropTypes.bool.isRequired,
+        user: PropTypes.object.isRequired,
+        data: PropTypes.object.isRequired,
+        dispatch: PropTypes.func.isRequired
     }
 
     componentWillMount() {
@@ -17,15 +22,34 @@ class Finance extends Component {
     componentWillReceiveProps() {
     }
 
+    updateTransactions = () => {
+        const { user, dispatch } = this.props;
+        dispatch(updateAccountRequest(user));
+    }
+
     linkAccount(e) {
         e.preventDefault()
         console.log("### Link account", e);
     }
 
     render() {
+        const { linked, data } = this.props;
+        // const dataArray = data.reduce((acc, obj) => {
+        //     console.log(arguments);
+        //     return acc.concat()
+        // }, []);
         return (
             <div>
-                {this.props.link && <Link onLinkClick={this.linkAccount} /> }
+                { linked ? (
+                    <button className="" onClick={this.updateTransactions} >Get transactions</button>
+                ) : (
+                    <Link onLinkClick={this.linkAccount} />
+                )}
+                { data.total && data.total > 0 ? ( 
+                    <Transactions data={[]} />
+                ) : (
+                    <div>No transactions!</div>
+                )}
             </div>
         );
     }
@@ -33,19 +57,26 @@ class Finance extends Component {
 }
 
 const mapStateToProps = state => {
-    const { auth, transactions } = state;
+    const { accounts, transactions, auth } = state;
 
     const {
-        link
-    } = auth;
+        linked
+    } = accounts;
 
     const {
-        isFetching
+        isFetching,
+        data
     } = transactions;
 
+    const { user } = auth;
+
+    console.log("Finance data prop: ", data);
+
     return {
-        // link,
-        isFetching
+        linked,
+        isFetching,
+        user,
+        data
     };
 };
 
