@@ -31,12 +31,17 @@ exports.getAll = (req, res) => {
 				return Promise.reject("No accounts found.");
 			}
 
-			return Promise.map(data, account => {
-				return Transaction.find({ account: account }).lean().exec();
-			});
+			return Promise.reduce(data, (transactions, account) => {
+				return Transaction.find({ account: account._id }).lean().exec()
+						.then(data => {
+							transactions[account.name] = data
+							transactions.total += data.length;
+							return transactions;
+						});
+			}, { total: 0 });
 		})
-		.reduce((transactions, data) => transactions.concat(data), [])
 		.then(data => {
+			console.log("TRANSACTIONS FIND: ", data);
 			return res.json({ transactions: data });
 		})
 		.catch(error => {
