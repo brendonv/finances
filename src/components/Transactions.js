@@ -1,15 +1,15 @@
 import React, { PropTypes } from 'react';
 
-const Transactions = ({transactions}) => (
+const Transactions = ({data}) => (
   <ul>
-    {transactions.map((transaction, i) =>
+    {data.map((transaction, i) =>
       <li key={i}>{transaction.title}</li>
     )}
   </ul>
 );
 
 Transactions.propTypes = {
-  transactions: PropTypes.array.isRequired
+  data: PropTypes.array.isRequired
 };
 
 export default Transactions;
