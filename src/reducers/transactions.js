@@ -16,6 +16,15 @@ export const transactionRequest = () => ({
     type: GET_TRANSACTIONS
 });
 
+export const transactionRequestSuccess = data => ({
+    type: GET_TRANSACTIONS_SUCCESS,
+    data
+});
+
+export const transactionRequestError = () => ({
+    type: GET_TRANSACTIONS_ERROR
+});
+
 export const getTransactions = user => dispatch => {
     dispatch(transactionRequest());
     return fetch(`user/${user._id}/transactions`)
@@ -26,7 +35,7 @@ export const getTransactions = user => dispatch => {
             return response.json();
         })
         .then(json => {
-            console.log("transaction json", json);
+            dispatch(transactionRequestSuccess({ data: json.transactions }));
         })
         .catch(response => {
             console.log("ERROR getTransactions", response);
@@ -37,7 +46,7 @@ export const getTransactions = user => dispatch => {
  * REDUCER
  */
 
-const transactionsInitialState = { isFetching: false, data: [] };
+const transactionsInitialState = { isFetching: false, data: { total: 0 } };
 
 export default function reducer(state = transactionsInitialState, action) {
 	switch (action.type) {
@@ -48,8 +57,8 @@ export default function reducer(state = transactionsInitialState, action) {
 			};
 		case GET_TRANSACTIONS_SUCCESS:
 			return {
-				data: [...state.data, action.transactions],
-				isFetching: false
+				isFetching: false,
+				...action.data
 			};
 		case GET_TRANSACTIONS_ERROR:
 			return {
