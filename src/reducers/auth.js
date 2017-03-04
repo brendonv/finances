@@ -6,30 +6,55 @@ import { setAccounts } from './accounts';
  * ACTIONS
  */
 
-const AUTH_REQUEST = "finances/AUTH_REQUEST";
-const AUTH_SUCCESS = "finances/AUTH_SUCCESS";
-const AUTH_FAILED = "finances/AUTH_FAILED";
+const SIGNUP_REQUEST = "finances/SIGNUP_REQUEST";
+const SIGNUP_SUCCESS = "finances/SIGNUP_SUCCESS";
+const SIGNUP_FAILED = "finances/SIGNUP_FAILED";
+
+const SIGNIN_REQUEST = "finances/SIGNIN_REQUEST";
+const SIGNIN_SUCCESS = "finances/SIGNIN_SUCCESS";
+const SIGNIN_FAILED = "finances/SIGNIN_FAILED";
 
 /**
  * ACTION CREATORS
  */
 
-export const authRequest = () => ({
-    type: AUTH_REQUEST
+export const signupRequest = () => ({
+    type: SIGNUP_REQUEST
 });
 
-export const authSuccess = user => ({
-    type: AUTH_SUCCESS,
+export const sigupSuccess = user => ({
+    type: SIGNUP_SUCCESS,
     user
 });
 
-export const authFailed = () => ({
-    type: AUTH_FAILED
+export const signupFailed = () => ({
+    type: SIGNUP_FAILED
 });
 
-export const checkAuth = () => dispatch => {
-    dispatch(authRequest());
-    return fetch('/checkauth', { method: 'POST' })
+export const signinRequest = () => ({
+    type: SIGNIN_REQUEST
+});
+
+export const signinSuccess = user => ({
+    type: SIGNIN_SUCCESS,
+    user
+});
+
+export const signinFailed = () => ({
+    type: SIGNIN_FAILED
+});
+
+export const checkAuth = username => dispatch => {
+    dispatch(signinRequest());
+    return fetch('/checkauth', { 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username
+            })
+        })
         .then(response => {
             if (!response.ok) {
                 return Promise.reject(response);
@@ -39,22 +64,25 @@ export const checkAuth = () => dispatch => {
         .then(json => {
             let { user, accounts } = json;
 
-            const mappedAccounts = accounts.reduce((acc, account) => {
-                acc[account.name] = account;
-                return acc;
-            }, {});
-
             if (!json.user) {
                 return Promise.reject();
             }
+
+            dispatch(signinSuccess(user));
             
-            dispatch(setAccounts(mappedAccounts));
-            dispatch(authSuccess(user));
+            if (accounts) {
+                const mappedAccounts = accounts.reduce((acc, account) => {
+                    acc[account.name] = account;
+                    return acc;
+                }, {});
+                dispatch(setAccounts(mappedAccounts));
+            }
+            
             return dispatch(getTransactions(user));
         })
         .catch(response => {
             console.log("ERROR: checkauth", response);
-            return dispatch(authFailed());
+            return dispatch(signinFailed());
         });
 };
 
@@ -66,18 +94,35 @@ export const checkAuth = () => dispatch => {
 
  export default function reducer(state = authInitialState, action) {
     switch (action.type) {
-        case AUTH_REQUEST:
+        case SIGNUP_REQUEST:
             return {
                 ...state,
                 isFetching: true
             };
-        case AUTH_SUCCESS:
+        case SIGNUP_SUCCESS:
             return {
                 isFetching: false,
                 loggedIn: true,
                 user: action.user
             };
-        case AUTH_FAILED:
+        case SIGNUP_FAILED:
+            return {
+                ...state,
+                isFetching: false,
+                loggedIn: false
+            };
+        case SIGNIN_REQUEST:
+            return {
+                ...state,
+                isFetching: true
+            };
+        case SIGNIN_SUCCESS:
+            return {
+                isFetching: false,
+                loggedIn: true,
+                user: action.user
+            };
+        case SIGNIN_FAILED:
             return {
                 ...state,
                 isFetching: false,

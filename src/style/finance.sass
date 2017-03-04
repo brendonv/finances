@@ -1,0 +1,25 @@
+.app
+	.signin
+		display: flex
+		flex-direction: row
+		justify-content: center
+		align-items: center
+		height: 760px
+		
+		form
+			+full-height-width
+			.input
+				+full-height-width
+				display: flex
+				flex-direction: column
+				justify-content: center
+				align-items: center
+		
+				.button
+					@extend .fn-button
+					height: 42px
+					width: 150px
+					box-shadow: 0 2px 5px 0 rgba(0,0,0,.26)
+					background-color: rgb(255, 189, 142)
+				.button:hover
+					background-color: rgba(255, 189, 142, 0.85)

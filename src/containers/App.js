@@ -1,7 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { checkAuth } from '../reducers/auth';
-import Signup from '../components/Signup';
 import Nav from '../components/Nav';
 import Finance from '../containers/Finance';
 
@@ -12,15 +11,46 @@ class App extends Component {
         dispatch: PropTypes.func.isRequired
     }
 
+    constructor(props) {
+        super(props);
+        this.state = { username: '' };
+        this.handleChange = this.handleChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
     componentDidMount() {
-        if (!this.props.loggedIn && !this.props.isFetching) {
-            this.props.dispatch(checkAuth());
-        } else if (this.props.loggedIn) {
+        // if (!this.props.loggedIn && !this.props.isFetching) {
+        //     this.props.dispatch(checkAuth());
+        // } else 
+        if (this.props.loggedIn) {
             console.log("LOGGED IN");
         }
     }
 
     componentWillReceiveProps() {
+    }
+
+    handleChange(e) {
+        const name = e.target.name;
+        const value = e.target.value;
+        this.setState({
+          [name]: value
+        });
+    }
+
+    handleSubmit(e) {
+        const { dispatch, user } = this.props;
+        e.preventDefault();
+        
+        if (!this.state.username.trim()) {
+          return;
+        }
+        
+        dispatch(checkAuth(this.state.username));
+        
+        this.setState({
+            username: ''
+        });     
     }
 
     render() {
@@ -31,7 +61,15 @@ class App extends Component {
                 {loggedIn ? ( 
                     <Finance/>
                 ) : (
-                    <div> So sorry </div>
+                    <div className="signin">
+                        <form onSubmit={this.handleSubmit}>
+                            <div className="input">
+                                <input name="username" value={this.state.username} placeholder="Your username" onChange={this.handleChange} />
+                                <button className="button" > Signin </button>
+                            </div>
+                        </form>
+                    </div>
+
                 )}
             </div>
         );
