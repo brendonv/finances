@@ -50,10 +50,10 @@ class Link extends Component {
     	return (
 			<div className="overlay">
 				<form onSubmit={this.handleSubmit}>
-				    <div className="link-input">
-				    	<input name="username" value={this.state.username} placeholder="Bank username" onChange={this.handleChange} />
-				    	<input name="password" value={this.state.password} placeholder="Bank password" onChange={this.handleChange} type="password" />
-				    	<button className="link"> Link to bank account </button>
+				    <div className="input-container">
+				    	<input className="input" name="username" value={this.state.username} placeholder="Bank username" onChange={this.handleChange} />
+				    	<input className="input" name="password" value={this.state.password} placeholder="Bank password" onChange={this.handleChange} type="password" />
+				    	<button className="button"> Link to bank account </button>
 				    </div>
 				</form>
 			</div>

@@ -39,7 +39,7 @@ class Finance extends Component {
         //     return acc.concat()
         // }, []);
         return (
-            <div>
+            <div className="finance">
                 { linked ? (
                     <button className="" onClick={this.updateTransactions} >Get transactions</button>
                 ) : (

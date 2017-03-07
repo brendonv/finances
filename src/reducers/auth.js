@@ -27,8 +27,9 @@ export const sigupSuccess = user => ({
     user
 });
 
-export const signupFailed = () => ({
-    type: SIGNUP_FAILED
+export const signupFailed = error => ({
+    type: SIGNUP_FAILED,
+    error
 });
 
 export const signinRequest = () => ({
@@ -40,8 +41,9 @@ export const signinSuccess = user => ({
     user
 });
 
-export const signinFailed = () => ({
-    type: SIGNIN_FAILED
+export const signinFailed = error => ({
+    type: SIGNIN_FAILED,
+    error
 });
 
 export const checkAuth = username => dispatch => {
@@ -82,7 +84,7 @@ export const checkAuth = username => dispatch => {
         })
         .catch(response => {
             console.log("ERROR: checkauth", response);
-            return dispatch(signinFailed());
+            dispatch(signinFailed({ error: response.statusText }));
         });
 };
 
@@ -90,7 +92,7 @@ export const checkAuth = username => dispatch => {
  * REDUCER
  */
 
- const authInitialState = { isFetching: false, loggedIn: false, user: {} };
+ const authInitialState = { isFetching: false, loggedIn: false, user: {}, error: null };
 
  export default function reducer(state = authInitialState, action) {
     switch (action.type) {
@@ -109,7 +111,8 @@ export const checkAuth = username => dispatch => {
             return {
                 ...state,
                 isFetching: false,
-                loggedIn: false
+                loggedIn: false,
+                ...action.error
             };
         case SIGNIN_REQUEST:
             return {
@@ -126,7 +129,8 @@ export const checkAuth = username => dispatch => {
             return {
                 ...state,
                 isFetching: false,
-                loggedIn: false
+                loggedIn: false,
+                ...action.error
             };
         default:
             return state;

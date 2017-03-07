@@ -23,8 +23,9 @@ export const linkAccountSuccess = () => ({
     type: LINK_ACCOUNT_SUCCESS
 });
 
-export const linkAccountFailure = () => ({
-    type: LINK_ACCOUNT_FAILURE
+export const linkAccountFailure = error => ({
+    type: LINK_ACCOUNT_FAILURE,
+    error
 });
 
 export const setAccounts = accounts => ({
@@ -33,15 +34,16 @@ export const setAccounts = accounts => ({
 });
 
 export const updateAccount = () => ({
-    type: UPDATE_ACCOUNT,
+    type: UPDATE_ACCOUNT
 });
 
 export const updateAccountSuccess = () => ({
-    type: UPDATE_ACCOUNT_SUCCESS,
+    type: UPDATE_ACCOUNT_SUCCESS
 });
 
-export const updateAccountError = () => ({
+export const updateAccountError = error => ({
     type: UPDATE_ACCOUNT_ERROR,
+    error
 });
 
 export const postLinkAccount = (user, data) => dispatch => {
@@ -69,7 +71,7 @@ export const postLinkAccount = (user, data) => dispatch => {
         })
         .catch(response => {
             console.log("ERROR: postLinkAccount", response);
-            //////
+            dispatch(linkAccountFailure(response));
         });
 };
 
@@ -94,8 +96,7 @@ export const updateAccountRequest = (user, date) => dispatch => {
         })
         .catch(response => {
             console.log("ERROR: postLinkAccount", response);
-            dispatch(updateAccountError());
-            //////
+            dispatch(updateAccountError(response));
         });
 };
 

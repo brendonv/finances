@@ -3,11 +3,13 @@ import { connect } from 'react-redux';
 import { checkAuth } from '../reducers/auth';
 import Nav from '../components/Nav';
 import Finance from '../containers/Finance';
+import ErrorModal from '../components/Error';
 
 class App extends Component {
     static propTypes = {
         loggedIn: PropTypes.bool.isRequired,
         isFetching: PropTypes.bool.isRequired,
+        error: PropTypes.object,
         dispatch: PropTypes.func.isRequired
     }
 
@@ -16,6 +18,7 @@ class App extends Component {
         this.state = { username: '' };
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.removeError = this.removeError.bind(this);
     }
 
     componentDidMount() {
@@ -53,8 +56,12 @@ class App extends Component {
         });     
     }
 
+    removeError(e) {
+        console.log("Remove error modal");
+    }
+
     render() {
-        const { loggedIn } = this.props;
+        const { loggedIn, error } = this.props;
         return (
             <div className="app">
                 <Nav/>
@@ -63,14 +70,15 @@ class App extends Component {
                 ) : (
                     <div className="signin">
                         <form onSubmit={this.handleSubmit}>
-                            <div className="input">
-                                <input name="username" value={this.state.username} placeholder="Your username" onChange={this.handleChange} />
+                            <div className="input-container">
+                                <input className="input" name="username" value={this.state.username} placeholder="Your username" onChange={this.handleChange} />
                                 <button className="button" > Signin </button>
                             </div>
                         </form>
                     </div>
 
                 )}
+                { error && <ErrorModal header="Error signing in." body={error} remove={this.removeError} /> }
             </div>
         );
     }
@@ -82,12 +90,14 @@ const mapStateToProps = state => {
 
     const  {
         isFetching,
-        loggedIn
+        loggedIn,
+        error
     } = auth;
 
     return {
         loggedIn,
-        isFetching
+        isFetching,
+        error
     };
 };
 

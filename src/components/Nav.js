@@ -18,7 +18,7 @@ class Nav extends Component {
         return (
             <div className="nav">
                 { this.props.loggedIn &&
-                    <div>{name}</div>
+                    <div className="user">{name}</div>
                 }
 
             </div>
