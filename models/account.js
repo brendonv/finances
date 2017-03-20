@@ -3,6 +3,7 @@ const Schema   = mongoose.Schema;
 
 
 const accountSchema = new Schema({
+	plaid_id: {type: String, required: true },
 	number: { type: String, required: true },
 	name: { type: String, required: true },
 	user: { type: Schema.Types.ObjectId, ref: 'User' },
