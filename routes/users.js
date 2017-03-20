@@ -9,8 +9,6 @@ const plaid = require('plaid');
 const Promise = require('bluebird');
 const moment = require('moment');
 
-console.log(config);
-
 //Promisify plaid
 const plaidClient = new plaid.Client(config.PLAID_CLIENT_ID, config.PLAID_SECRET, plaid.environments.tartan);
 const addConnectUserAsync = Promise.promisify(plaidClient.addConnectUser, { context: plaidClient, multiArgs: true });
@@ -68,6 +66,7 @@ exports.link = (req, res) => {
     let user = req.user;
 
     let accounts = [];
+    console.log("LINK:", user);
 
     if (!username || !password) {
         return res.status(400).json({ message: "Missing username or password." });
@@ -84,6 +83,7 @@ exports.link = (req, res) => {
         const response = responseArray[1];
 
         if (mfaResponse) {
+            console.log("MFA RESPONSE EXISTS");
             //TODO: update with actual mfa response
             return stepConnectUserAsync(mfaResponse.access_token, 'tomato', {})
                     .then(responseArray => {
@@ -107,9 +107,10 @@ exports.link = (req, res) => {
         user.access_token = response.access_token;
 
         console.log("### RESPONSE ACCOUNTS: ", response.accounts);
+        console.log("### ACCESS_TOKEN: ", response.access_token);
 
         return Promise.all([
-            // user.save(),
+            user.save(),
             Promise.map(response.accounts, data => {
                 const { name, number } = data.meta;
 
@@ -150,8 +151,8 @@ exports.link = (req, res) => {
                     category_id
                 } = data;
 
-                let plaid_account = accounts.find(acct => acct.plaid_id === _account);
-                if (!plaid_account_id) {
+                let plaid_account = response.accounts.find(acct => acct._id === _account);
+                if (!plaid_account) {
                     console.log("WARNING: no Plaid account id found for transaction: ", data);
                 }
 
@@ -159,7 +160,7 @@ exports.link = (req, res) => {
                 transaction.data = moment(date).format();
                 transaction.name = name;
                 transaction.amount = amount;
-                transaction.account = plaid_account._id;
+                transaction.account = plaid_account && plaid_account._id || null;
 
                 return Category.findOne({ plaid_id: category_id })
                         .then(cat => {
@@ -169,10 +170,12 @@ exports.link = (req, res) => {
                                 newCategory.types = category;
                                 return newCategory.save().then(doc => {
                                     transaction.category = doc._id;
+                                    console.log("SAVING TRANSACTION: ", transaction);
                                     return transaction.save();
                                 })
                             }
                             transaction.category = cat._id;
+                            console.log("SAVING TRANSACTION: ", transaction);
                             return transaction.save();
                         });
             })
@@ -183,7 +186,7 @@ exports.link = (req, res) => {
         res.json({ message: "success" });
     })
     .catch(error => {
-        console.log("ERROR: ", error.message);
+        console.log("ERROR: ", error.message, JSON.stringify(error));
         res.status(500).json({ message: "Error: unable to update user and save accounts."})
     });
 };
