@@ -51,6 +51,10 @@ exports.getAll = (req, res) => {
 	}
 };
 
+exports.getFromPlaid = (req, res) => {
+
+};
+
 exports.save = (req, res) => {
 	Transaction.save({}).then(data => {
 		return res.status(200).send("Successful save.");
