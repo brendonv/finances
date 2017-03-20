@@ -4,13 +4,15 @@ const config = require("../config")[env];
 const User = mongoose.model('User');
 const Account = mongoose.model('Account');
 const Transaction = mongoose.model('Transaction');
-const Category = require('Category');
+const Category = mongoose.model('Category');
 const plaid = require('plaid');
 const Promise = require('bluebird');
 const moment = require('moment');
 
+console.log(config);
+
 //Promisify plaid
-const plaidClient = new plaid.Client("test_id", "test_secret", plaid.environments.tartan);
+const plaidClient = new plaid.Client(config.PLAID_CLIENT_ID, config.PLAID_SECRET, plaid.environments.tartan);
 const addConnectUserAsync = Promise.promisify(plaidClient.addConnectUser, { context: plaidClient, multiArgs: true });
 const stepConnectUserAsync = Promise.promisify(plaidClient.stepConnectUser, { context: plaidClient, multiArgs: true });
 // Promise.promisifyAll(plaid, {
@@ -61,10 +63,8 @@ exports.create = (req, res) => {
 };
 
 exports.link = (req, res) => {
-    const username = "plaid_test";
-    const password = "plaid_good";
-    // const username = req.body.username;
-    // const password = req.body.password;
+    const username = config.bofa_account_name;
+    const password = config.bofa_account_password;
     let user = req.user;
 
     let accounts = [];
@@ -77,8 +77,6 @@ exports.link = (req, res) => {
         return res.json({message: "Already linked account"});
     }
 
-    const plaidClient = new plaid.Client("test_id", "test_secrett", plaid.environments.tartan);
-
     addConnectUserAsync("bofa", { username, password })
     .then(responseArray => {
         //mfaResponse, response
@@ -86,6 +84,7 @@ exports.link = (req, res) => {
         const response = responseArray[1];
 
         if (mfaResponse) {
+            //TODO: update with actual mfa response
             return stepConnectUserAsync(mfaResponse.access_token, 'tomato', {})
                     .then(responseArray => {
                         //mfaResponse, response
@@ -141,7 +140,7 @@ exports.link = (req, res) => {
             Promise.map(response.transactions, data => {
                 console.log("TRANSACTION: ", data);
                 const {
-                    _account
+                    _account,
                     date,
                     name,
                     amount,
@@ -176,7 +175,7 @@ exports.link = (req, res) => {
                             transaction.category = cat._id;
                             return transaction.save();
                         });
-            });
+            })
         ]);
     })
     .then(results => {
