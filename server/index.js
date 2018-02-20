@@ -1,10 +1,11 @@
 const express = require('express');
 const https = require('https');
+const http = require('http');
 const fs = require('fs');
 const mongoose = require('mongoose');
 mongoose.Promise = require("bluebird");
 const env = process.env.env || "DEV";
-const config = require("./config")[env];
+const config = require("../config/environment")[env];
 const morgan = require("morgan");
 
 const bodyParser = require('body-parser');
@@ -12,7 +13,7 @@ const bodyParser = require('body-parser');
 const webpack = require("webpack");
 const webpackDevMiddleware = require("webpack-dev-middleware");
 const webpackHotMiddleware = require('webpack-hot-middleware');
-const webpackConfig = require("./webpack.config");
+const webpackConfig = require("../webpack.config");
 
 const PORT = process.env.PORT || 3000;
 
@@ -38,7 +39,7 @@ app.use(morgan('tiny'));
  * Mongoose DB connection
  */
 
-mongoose.connect(config.mongoDB);
+mongoose.connect(config.mongodb);
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', (cb) => {
@@ -65,9 +66,15 @@ app.get('/', (req, res) => {
     return res.sendFile(__dirname + "/public/index.html");
 });
 
-app.post('/checkauth', users.get);
+app.get('/hook', (req, res) => {
+    console.log("HOOK -- GET", req.query);
+});
 
-app.post('/signup', users.create);
+app.post('/hook', (req, res) => {
+    console.log("HOOK -- POST", req.body);
+});
+
+app.post('/accesstoken', users.getAccessToken);
 
 app.get('/categories', categories.getAll);
 app.post('/categories', categories.save);
@@ -75,17 +82,7 @@ app.put('/categories', categories.update);
 // app.delete('/categories', categories.update);
 app.get('/categories/:categoryId', categories.get);
 
-
-app.get('/user/:userId', users.get);
-app.put('/user/:userId', users.update);
-app.post('/user/:userId/link', users.link);
-app.put('/user/:userId/update', users.updatePlaidAccount);
-app.get('/user/:userId/transactions', transactions.getAll);
-app.get('/user/:userId/transactions/:accountId', transactions.getAll);
-app.post('/user/:userId/transactions', transactions.save);
-app.get('/user/:userId/transactions/:transactionId', transactions.get);
-app.put('/user/:userId/transactions/:transactionId', transactions.update);
-// app.delete('/:userId/transactions/:transactionId', transactions.update);
+app.get('/user/:userId/accounts', users.getAccounts);
 
 app.param('categoryId', (req, res, next, id) => {
     Category.findById(id).then(data => {
@@ -126,11 +123,17 @@ app.param('accountId', (req, res, next, id) => {
 //LISTEN
 try {
     https.createServer({
-        key: fs.readFileSync('finance_key.pem'),
-        cert: fs.readFileSync('finance_cert.pem')
+        key: fs.readFileSync('finance_app.key'),
+        cert: fs.readFileSync('finance_app.cert')
     }, app).listen(3000);
 } catch (error) {
+    console.log("ERROR", error);
     app.listen(PORT, () => {
       console.log("App listening on 3000");
     });
 }
+
+http.createServer((req, res) => {
+    res.writeHead(301, { Location: 'https://' + req.headers.host.replace(/(\:)([0-9]+)/, '$13000') + req.url });
+    res.end();
+}).listen(3001);

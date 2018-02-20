@@ -1,27 +1,35 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { checkAuth } from '../reducers/auth';
+import { checkAuth, accessToken } from '../modules/auth';
 import Nav from '../components/Nav';
 import Finance from '../containers/Finance';
 import ErrorModal from '../components/Error';
 
 class App extends Component {
-    static propTypes = {
-        loggedIn: PropTypes.bool.isRequired,
-        isFetching: PropTypes.bool.isRequired,
-        error: PropTypes.object,
-        dispatch: PropTypes.func.isRequired
-    }
 
-    constructor(props) {
+    constructor (props) {
         super(props);
         this.state = { username: '' };
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.removeError = this.removeError.bind(this);
+
+        const { onSignupClick } = this.props;
+
+        this.handleCLick = this.handleClick.bind(this);
+        this.plaidClient = Plaid.create({
+            apiVersion: 'v2',
+            clientName: "Finance App",
+            env: 'sandbox',
+            key: PLAID_PUBLIC_KEY,
+            product: ['transactions'],
+            onLoad: () => console.log("PLAID CLIENT ONLOAD"),
+            onSuccess: onSignupClick,
+            onEvent: (eventName, metadata) => console.log("PLAID CLIENT ONEVENT", eventName, metadata)
+        })
     }
 
-    componentDidMount() {
+    componentDidMount () {
         // if (!this.props.loggedIn && !this.props.isFetching) {
         //     this.props.dispatch(checkAuth());
         // } else 
@@ -30,10 +38,15 @@ class App extends Component {
         }
     }
 
-    componentWillReceiveProps() {
+    componentWillReceiveProps () {
     }
 
-    handleChange(e) {
+    handleClick () {
+        console.log("HANDLE CLICK");
+        this.plaidClient.open();
+    }
+
+    handleChange (e) {
         const name = e.target.name;
         const value = e.target.value;
         this.setState({
@@ -41,7 +54,7 @@ class App extends Component {
         });
     }
 
-    handleSubmit(e) {
+    handleSubmit (e) {
         const { dispatch, user } = this.props;
         e.preventDefault();
         
@@ -56,11 +69,11 @@ class App extends Component {
         });     
     }
 
-    removeError(e) {
+    removeError (e) {
         console.log("Remove error modal");
     }
 
-    render() {
+    render () {
         const { loggedIn, error } = this.props;
         return (
             <div className="app">
@@ -69,12 +82,7 @@ class App extends Component {
                     <Finance/>
                 ) : (
                     <div className="signin">
-                        <form onSubmit={this.handleSubmit}>
-                            <div className="input-container">
-                                <input className="input" name="username" value={this.state.username} placeholder="Your username" onChange={this.handleChange} />
-                                <button className="button" > Signin </button>
-                            </div>
-                        </form>
+                        <button className="button" onClick={this.handleClick.bind(this)}> Link an Account </button>
                     </div>
 
                 )}
@@ -84,6 +92,13 @@ class App extends Component {
     }
 
 }
+
+App.propTypes = {
+    loggedIn: PropTypes.bool.isRequired,
+    isFetching: PropTypes.bool.isRequired,
+    error: PropTypes.object,
+    onSignupClick: PropTypes.func.isRequired
+};
 
 const mapStateToProps = state => {
     const { auth } = state;
@@ -101,6 +116,8 @@ const mapStateToProps = state => {
     };
 };
 
+const mapDispatchToProps = dispatch => ({
+    onSignupClick: (publicToken, metadata) => dispatch(accessToken(publicToken, metadata))
+});
 
-
-export default connect(mapStateToProps)(App);
+export default connect(mapStateToProps, mapDispatchToProps)(App);

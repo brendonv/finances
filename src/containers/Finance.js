@@ -1,8 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import Link from '../components/Link';
 import Transactions from '../components/Transactions';
-import { updateAccountRequest } from '../reducers/accounts';
+import { updateAccountRequest } from '../modules/accounts';
 
 class Finance extends Component {
     static propTypes = {
@@ -40,16 +39,7 @@ class Finance extends Component {
         // }, []);
         return (
             <div className="finance">
-                { linked ? (
-                    <button className="" onClick={this.updateTransactions} >Get transactions</button>
-                ) : (
-                    <Link onLinkClick={this.linkAccount} />
-                )}
-                { data.total && data.total > 0 ? ( 
-                    <Transactions data={[]} />
-                ) : (
-                    <div>No transactions!</div>
-                )}
+                <h1> Finance</h1>
             </div>
         );
     }

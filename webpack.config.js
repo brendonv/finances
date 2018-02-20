@@ -1,13 +1,15 @@
+const ENV = process.env.NODE_ENV || "DEV";
 const path = require('path');
 const webpack = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const config = require('./config/environment')[ENV];
 
 module.exports = {
   devtool: 'cheap-module-eval-source-map',
   entry: [
     'whatwg-fetch',
     'webpack-hot-middleware/client',
-    path.join(__dirname, 'src/index.js')
+    path.join(__dirname, 'src/finances.js')
   ],
   output: {
     path: path.join(__dirname, 'dist'),
@@ -20,7 +22,8 @@ module.exports = {
     //CUSTOM RUN_TIME ENV VARIABLES.
     new webpack.DefinePlugin({
       PORT: JSON.stringify(process.env.PORT) || 5000, 
-      URL: JSON.stringify(process.env.url) || JSON.stringify("http://localhost:" + (process.env.PORT || 5000))
+      URL: JSON.stringify(process.env.url) || JSON.stringify("http://localhost:" + (process.env.PORT || 5000)),
+      PLAID_PUBLIC_KEY: JSON.stringify(config.plaid.public_key)
     }),
     new ExtractTextPlugin('index.css', {
       allChunks: true

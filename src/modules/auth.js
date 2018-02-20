@@ -1,50 +1,80 @@
 import { API } from '../constants/config';
 import { getTransactions } from './transactions';
-import { setAccounts } from './accounts';
+import { getAccounts } from './accounts';
 
 /**
  * ACTIONS
  */
 
-const SIGNUP_REQUEST = "finances/SIGNUP_REQUEST";
-const SIGNUP_SUCCESS = "finances/SIGNUP_SUCCESS";
-const SIGNUP_FAILED = "finances/SIGNUP_FAILED";
+export const actionTypes = {
+    SIGNUP_REQUEST: "finances/auth/SIGNUP_REQUEST",
+    SIGNUP_SUCCESS: "finances/auth/SIGNUP_SUCCESS",
+    SIGNUP_FAILED: "finances/auth/SIGNUP_FAILED",
+    SIGNIN_REQUEST: "finances/auth/SIGNIN_REQUEST",
+    SIGNIN_SUCCESS: "finances/auth/SIGNIN_SUCCESS",
+    SIGNIN_FAILED: "finances/auth/SIGNIN_FAILED"
+ };
 
-const SIGNIN_REQUEST = "finances/SIGNIN_REQUEST";
-const SIGNIN_SUCCESS = "finances/SIGNIN_SUCCESS";
-const SIGNIN_FAILED = "finances/SIGNIN_FAILED";
+
 
 /**
  * ACTION CREATORS
  */
 
 export const signupRequest = () => ({
-    type: SIGNUP_REQUEST
+    type: actionTypes.SIGNUP_REQUEST
 });
 
-export const sigupSuccess = user => ({
-    type: SIGNUP_SUCCESS,
-    user
+export const signupSuccess = user => ({
+    type: actionTypes.SIGNUP_SUCCESS,
+    payload: user
 });
 
 export const signupFailed = error => ({
-    type: SIGNUP_FAILED,
+    type: actionTypes.SIGNUP_FAILED,
     error
 });
 
 export const signinRequest = () => ({
-    type: SIGNIN_REQUEST
+    type: actionTypes.SIGNIN_REQUEST
 });
 
 export const signinSuccess = user => ({
-    type: SIGNIN_SUCCESS,
-    user
+    type: actionTypes.SIGNIN_SUCCESS,
+    payload: user
 });
 
 export const signinFailed = error => ({
-    type: SIGNIN_FAILED,
+    type: actionTypes.SIGNIN_FAILED,
     error
 });
+
+export const accessToken = (publicToken, metadata) => dispatch => {
+    dispatch(signupRequest());
+    return fetch('/accesstoken', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            publicToken,
+            metadata
+        })
+    }).then(response => {
+        if (!response.ok) {
+            return Promise.reject(response);
+        }
+        return response.json();
+    }).then(response => {
+        console.log("ACCESS TOKEN SUCCESS", response);
+        localStorage.setItem('user', JSON.stringify({ id: response.userId }));
+        dispatch(signupSuccess({ user: { id: response.userId } }));
+        dispatch(getAccounts());
+    }).catch(response => {
+        console.log("ERROR: accessToken", response);
+        dispatch(signupFailed({ error: response.statusText }));
+    });
+}
 
 export const checkAuth = username => dispatch => {
     dispatch(signinRequest());
@@ -92,40 +122,47 @@ export const checkAuth = username => dispatch => {
  * REDUCER
  */
 
- const authInitialState = { isFetching: false, loggedIn: false, user: {}, error: null };
+export const InitialState = Object.freeze({
+    isFetching: false,
+    loggedIn: false, 
+    user: {}, 
+    error: null 
+});
 
- export default function reducer(state = authInitialState, action) {
+export default function reducer(state = InitialState, action) {
     switch (action.type) {
-        case SIGNUP_REQUEST:
+        case actionTypes.SIGNUP_REQUEST:
             return {
                 ...state,
                 isFetching: true
             };
-        case SIGNUP_SUCCESS:
+        case actionTypes.SIGNUP_SUCCESS:
             return {
+                ...state,
                 isFetching: false,
                 loggedIn: true,
-                user: action.user
+                user: action.payload.user
             };
-        case SIGNUP_FAILED:
+        case actionTypes.SIGNUP_FAILED:
             return {
                 ...state,
                 isFetching: false,
                 loggedIn: false,
                 ...action.error
             };
-        case SIGNIN_REQUEST:
+        case actionTypes.SIGNIN_REQUEST:
             return {
                 ...state,
                 isFetching: true
             };
-        case SIGNIN_SUCCESS:
+        case actionTypes.SIGNIN_SUCCESS:
             return {
+                ...state,
                 isFetching: false,
                 loggedIn: true,
-                user: action.user
+                user: action.payload.user
             };
-        case SIGNIN_FAILED:
+        case actionTypes.SIGNIN_FAILED:
             return {
                 ...state,
                 isFetching: false,
