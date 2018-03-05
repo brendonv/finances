@@ -1,11 +1,8 @@
-import React, { Component, PropTypes } from 'react';
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 class Nav extends Component {
-    static propTypes = {
-        user: PropTypes.object,
-        loggedIn: PropTypes.bool.isRequired
-    }
 
     componentDidMount() {
     }
@@ -14,33 +11,20 @@ class Nav extends Component {
     }
 
     render() {
-        const name = this.props.user && this.props.user.name;
         return (
             <div className="nav">
-                { this.props.loggedIn &&
-                    <div className="user">{name}</div>
-                }
-
+            Nav
             </div>
         );
     }
 
 }
 
-const mapStateToProps = state => {
-    const { auth } = state;
+Nav.propTypes = {
 
-    const  {
-        loggedIn,
-        user
-    } = auth;
-
-    return {
-        loggedIn,
-        user
-    };
 };
 
-
+const mapStateToProps = state => ({
+});
 
 export default connect(mapStateToProps)(Nav);

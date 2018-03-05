@@ -5,73 +5,62 @@ const User = mongoose.model('User');
 const Account = mongoose.model('Account');
 const Transaction = mongoose.model('Transaction');
 const Category = mongoose.model('Category');
-const plaid = require('plaid');
-const Promise = require('bluebird');
 const moment = require('moment');
 
 const DEFAULT_USER_ID = "5a7752108bfce81f28b4b4ab";
 
-//Promisify plaid
-const plaidClient = new plaid.Client(config.plaid.client_id, config.plaid.secret, config.plaid.public_key, plaid.environments["sandbox"]);
-const $exchangePublicToken = Promise.promisify(plaidClient.exchangePublicToken, { context: plaidClient }); //multiArgs: true
-const $getAuth = Promise.promisify(plaidClient.getAuth, { context: plaidClient });
-// Promise.promisifyAll(plaid, {
-//     filter: function(name) {
-//         return name === "addConnectUser";
-//     },
-//     multiArgs: true
-// });
+exports.getAccessToken = async ctx => {
+    console.log(ctx);
+    const publicToken = ctx.request.body.publicToken;
 
-exports.getAccessToken = (req, res) => {
-    const publicToken = req.body.publicToken;
-    let userObject;
+    const user = await User.findById(DEFAULT_USER_ID);
+    if (!user) {
+        throw new Error('User not found.');
+    }
 
-    User.findById(DEFAULT_USER_ID).then(user => {
-        userObject = user;
-        if (!user) {
-            return Promise.reject('No user found');
-        }
-        return $exchangePublicToken(publicToken);
+    const tokenResponse = await ctx.plaidClient.exchangePublicToken(publicToken);
+    user.access_token = tokenResponse.access_token;
+    user.save();
 
-    }).then(tokenResponse => {
-        accessToken = tokenResponse.access_token;
-        itemId = tokenResponse.item_id;
-        userObject.access_token = accessToken;
-        res.json({ userId: DEFAULT_USER_ID });
-        return userObject.save();
-    }).catch(error => {
-        console.log("ERROR /accesstoken could not exchange public token", error);
-        res.status(500).json({ error: error.message });
-    });
+    ctx.body = { userId: DEFAULT_USER_ID };
+
+    // }).catch(error => {
+    //     console.log("ERROR /accesstoken could not exchange public token", error);
+    //     res.status(500).json({ error: error.message });
+    // });
     
 };
 
 exports.getAccounts = (req, res) => {
+    
     $getAuth(req.user.access_token)
     .then(response => {
-        console.log("GET ACCOUNTS RESPONSE", JSON.stringify(response,null,4));
-        response.accounts.forEach(account => {
-            Account.findById(account.account_id).then(acct => {
-                if (!acct) {
-                    const accountObject = new Account({
-                        plaid_id: account.account_id,
-                        user: req.user._id,
-                        name: account.name,
-                        official_name: account.official_name,
-                        type: account.type,
-                        subtype: account.subtype,
-                        balance: account.ballance
-                    });
-                    return Account.save();
-                } else {
-                    mergeDiff(["name", "official_name", "type", "subtype", "balance"], account, acct);
-                    return acct.save();
-                }
-            }).catch(err => {
-                console.log("ERROR SAVING OR UPDATING ACCOUNT", err);
-            });
-        });
-        res.status(200);
+        return Promise.all(
+            response.accounts.map(account => 
+                Account.findOne({ plaidId: account.account_id })
+                .then(acct => {
+                    if (!acct) {
+                        const accountObject = new Account({
+                            plaidId: account.account_id,
+                            user: req.user._id,
+                            name: account.name,
+                            officialName: account.official_name,
+                            type: account.type,
+                            subtype: account.subtype,
+                            balance: account.ballance
+                        });
+                        return accountObject.save();
+                    } else {
+                        // mergeDiff(["name", "officialName", "type", "subtype", "balance"], account, acct);
+                        return acct.save();
+                    }
+                }).catch(err => {
+                    console.log("ERROR SAVING OR UPDATING ACCOUNT", err);
+                })
+            )
+        );
+    }).then(accounts => {
+        res.json({ accounts });
     }).catch(error => {
         console.log(`ERROR /user/${user.id}/accounts could not get accounts ${JSON.stringify(err,null,4)}`);
         res.status(500).json({ error: error.message });

@@ -2,17 +2,19 @@ import { API } from '../constants/config';
 import { getTransactions } from './transactions';
 import { getAccounts } from './accounts';
 
+export const STORE_KEY = 'user';
+
 /**
  * ACTIONS
  */
 
 export const actionTypes = {
-    SIGNUP_REQUEST: "finances/auth/SIGNUP_REQUEST",
-    SIGNUP_SUCCESS: "finances/auth/SIGNUP_SUCCESS",
-    SIGNUP_FAILED: "finances/auth/SIGNUP_FAILED",
-    SIGNIN_REQUEST: "finances/auth/SIGNIN_REQUEST",
-    SIGNIN_SUCCESS: "finances/auth/SIGNIN_SUCCESS",
-    SIGNIN_FAILED: "finances/auth/SIGNIN_FAILED"
+    SIGNUP_REQUEST: "finances/modules/user/SIGNUP_REQUEST",
+    SIGNUP_SUCCESS: "finances/modules/user/SIGNUP_SUCCESS",
+    SIGNUP_FAILED: "finances/modules/user/SIGNUP_FAILED",
+    SIGNIN_REQUEST: "finances/modules/user/SIGNIN_REQUEST",
+    SIGNIN_SUCCESS: "finances/modules/user/SIGNIN_SUCCESS",
+    SIGNIN_FAILED: "finances/modules/user/SIGNIN_FAILED"
  };
 
 
@@ -118,16 +120,16 @@ export const checkAuth = username => dispatch => {
         });
 };
 
-/**
- * REDUCER
- */
-
 export const InitialState = Object.freeze({
     isFetching: false,
     loggedIn: false, 
     user: {}, 
     error: null 
 });
+
+/**
+ * REDUCER
+ */
 
 export default function reducer(state = InitialState, action) {
     switch (action.type) {
@@ -172,4 +174,13 @@ export default function reducer(state = InitialState, action) {
         default:
             return state;
     }
+};
+
+/**
+ * SELECTOR
+ */
+
+export const selectors = {
+    getUser: state => state[STORE_KEY].user,
+    isLoggedIn: state => state[STORE_KEY].loggedIn
 };

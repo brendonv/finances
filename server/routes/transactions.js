@@ -1,7 +1,10 @@
-const Promise = require('bluebird');
 const mongoose = require('mongoose');
 const Transaction = mongoose.model('Transaction');
 const Account = mongoose.model('Account');
+
+exports.getTransactionsForAccount = (req, res) => {
+	res.status(200);
+};
 
 exports.get = (req, res) => {
 	if (!req.transaction) return res.sendStatus(404);

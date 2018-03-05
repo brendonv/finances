@@ -1,11 +1,11 @@
 import { combineReducers } from 'redux';
 
 import accounts from './accounts';
-import auth from './auth';
+import user from './user';
 import transactions from './transactions';
 
 export default combineReducers({
 	accounts,
-	auth,
+	user,
     transactions
 });

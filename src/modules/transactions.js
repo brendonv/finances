@@ -1,71 +1,89 @@
 import { API } from '../constants/config';
+import {selectors as userSelectors} from '../modules/user';
+
+const STORE_KEY = 'transactions';
 
 /**
  * ACTIONS
  */
 
-const GET_TRANSACTIONS = "finances/GET_TRANSACTIONS";
-const GET_TRANSACTIONS_SUCCESS = "finances/GET_TRANSACTIONS_SUCCESS";
-const GET_TRANSACTIONS_ERROR = "finances/GET_TRANSACTIONS_ERROR";
+export const actionTypes = {
+    GET_TRANSACTIONS: "finances/modules/transactions/GET_TRANSACTIONS",
+    SET_TRANSACTIONS: "finances/modules/transactions/SET_TRANSACTIONS"
+};
 
  /**
  * ACTION CREATORS
  */
 
-export const transactionRequest = () => ({
-    type: GET_TRANSACTIONS
+export const getTransactions = () => ({
+    type: actionTypes.GET_TRANSACTIONS
 });
 
-export const transactionRequestSuccess = data => ({
-    type: GET_TRANSACTIONS_SUCCESS,
-    data
+export const setTransactions = transactions => ({
+    type: actionTypes.SET_TRANSACTIONS,
+    payload: { transactions }
 });
 
-export const transactionRequestError = () => ({
-    type: GET_TRANSACTIONS_ERROR
-});
+export const getTransactionsRequest = () => {
+    return (dispatch, getState) => {
+        dispatch(getTransactions());
 
-export const getTransactions = user => dispatch => {
-    dispatch(transactionRequest());
-    return fetch(`user/${user._id}/transactions`)
-        .then(response => {
-            if (!response.ok) {
-                return Promise.reject(response);
-            }
-            return response.json();
-        })
-        .then(json => {
-            dispatch(transactionRequestSuccess({ data: json.transactions }));
-        })
-        .catch(response => {
-            console.log("ERROR getTransactions", response);
-        });
+        const user = userSelectors.getUser(getState());
+
+        return fetch(`user/${user.id}/transactions`)
+            .then(response => {
+                if (!response.ok) {
+                    return Promise.reject(response);
+                }
+                return response.json();
+            })
+            .then(json => {
+                console.log("GET TRANSACTIONS REQUEST RESPONSE", json);
+            })
+            .catch(response => {
+                console.log("ERROR getTransactions", response);
+            });
+        
+    }
+
 };
 
 /**
  * REDUCER
  */
 
-const transactionsInitialState = { isFetching: false, data: { total: 0 } };
+export const InitialState = Object.freeze({
+    isFetching: false,
+    transactions: {}
+});
 
-export default function reducer(state = transactionsInitialState, action) {
+export default function reducer(state = InitialState, action) {
 	switch (action.type) {
-		case GET_TRANSACTIONS:
+		case actionTypes.GET_TRANSACTIONS:
 			return {
 				...state,
 				isFetching: true
 			};
-		case GET_TRANSACTIONS_SUCCESS:
+		
+        case actionTypes.SET_TRANSACTIONS:
 			return {
 				isFetching: false,
-				...action.data
+				transactions: {
+                    ...state.transactions,
+                    ...action.payload.transactions
+                }
 			};
-		case GET_TRANSACTIONS_ERROR:
-			return {
-				...state,
-				isFetching: false
-			};
+
 		default:
 			return state;
 	}
+};
+
+/**
+ * SELECTORS
+ */
+
+export const selectors = {
+    getTransactions: state => state[STORE_KEY].transactions
 };

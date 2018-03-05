@@ -1,8 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { checkAuth, accessToken } from '../modules/auth';
+import { checkAuth, accessToken, selectors as userSelectors } from '../modules/user';
 import Nav from '../components/Nav';
-import Finance from '../containers/Finance';
+import AccountsView from '../containers/AccountsView';
 import ErrorModal from '../components/Error';
 
 class App extends Component {
@@ -30,9 +30,6 @@ class App extends Component {
     }
 
     componentDidMount () {
-        // if (!this.props.loggedIn && !this.props.isFetching) {
-        //     this.props.dispatch(checkAuth());
-        // } else 
         if (this.props.loggedIn) {
             console.log("LOGGED IN");
         }
@@ -79,7 +76,7 @@ class App extends Component {
             <div className="app">
                 <Nav/>
                 {loggedIn ? ( 
-                    <Finance/>
+                    <AccountsView />
                 ) : (
                     <div className="signin">
                         <button className="button" onClick={this.handleClick.bind(this)}> Link an Account </button>
@@ -95,26 +92,13 @@ class App extends Component {
 
 App.propTypes = {
     loggedIn: PropTypes.bool.isRequired,
-    isFetching: PropTypes.bool.isRequired,
-    error: PropTypes.object,
-    onSignupClick: PropTypes.func.isRequired
+    onSignupClick: PropTypes.func.isRequired,
+    error: PropTypes.object
 };
 
-const mapStateToProps = state => {
-    const { auth } = state;
-
-    const  {
-        isFetching,
-        loggedIn,
-        error
-    } = auth;
-
-    return {
-        loggedIn,
-        isFetching,
-        error
-    };
-};
+const mapStateToProps = state => ({
+    loggedIn: userSelectors.isLoggedIn(state)
+});
 
 const mapDispatchToProps = dispatch => ({
     onSignupClick: (publicToken, metadata) => dispatch(accessToken(publicToken, metadata))

@@ -1,39 +1,48 @@
-const express = require('express');
+const Koa = require('koa');
 const https = require('https');
 const http = require('http');
 const fs = require('fs');
+const Router = require('koa-router');
 const mongoose = require('mongoose');
-mongoose.Promise = require("bluebird");
 const env = process.env.env || "DEV";
 const config = require("../config/environment")[env];
-const morgan = require("morgan");
+const plaid = require('plaid');
 
-const bodyParser = require('body-parser');
-
-const webpack = require("webpack");
-const webpackDevMiddleware = require("webpack-dev-middleware");
-const webpackHotMiddleware = require('webpack-hot-middleware');
-const webpackConfig = require("../webpack.config");
+const bodyParser = require('koa-bodyparser');
+const bunyan = require('bunyan');
+const compress = require('koa-compress');
+const serveStatic = require('koa-static');
+const logger = require('koa-logger');
 
 const PORT = process.env.PORT || 3000;
 
-const app = express();
+const app = new Koa();
 
 //MIDDLEWARE
 
-// parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }));
-// parse application/json
-app.use(bodyParser.json());
+app.use(logger());
 
-app.use(express.static('public'));
-// app.use(express.static('dist'));
-const compiler = webpack(webpackConfig);
+app.use(async (ctx, next) => {
+    try {
+        await next();
+    } catch (err) {
+        console.log("KOA ERROR MIDDLEWARE");
+        ctx.status = err.status || 500;
+        ctx.body = err.message;
+        ctx.app.emit('error', err, ctx);
+    }
+});
 
-app.use(webpackDevMiddleware(compiler, { noInfo: true, publicPath: webpackConfig.output.publicPath }));
-app.use(webpackHotMiddleware(compiler));
+app.use(compress());
 
-app.use(morgan('tiny'));
+app.use(bodyParser({
+    onerror: (error, ctx) => ctx.throw('body parse error')
+    // TODO: set limits here
+}));
+
+app.on('error', (error, ctx) => {
+    console.log("APP ON ERROR", error);
+});
 
 /*
  * Mongoose DB connection
@@ -60,74 +69,65 @@ const categories = require('./routes/categories');
 const transactions = require('./routes/transactions');
 const users = require('./routes/users');
 
-//ROUTES
+app.use(serveStatic(process.cwd() + "/public"));
 
-app.get('/', (req, res) => {
-    return res.sendFile(__dirname + "/public/index.html");
+app.use(async (ctx, next) => {
+    const plaidClient = new plaid.Client(
+        config.plaid.client_id,
+        config.plaid.secret,
+        config.plaid.public_key,
+        plaid.environments["sandbox"]
+    );
+    ctx.plaidClient = plaidClient;
+    await next();
 });
 
-app.get('/hook', (req, res) => {
+//ROUTES
+const router = new Router();
+
+router.param('userId', async (id, ctx, next) => {
+    const user = await User.findById(id);
+    ctx.user = user;
+    await next();
+});
+
+router.param('transactionId', async (id, ctx, next) => {
+    const transation = await Transaction.findById(id);
+    ctx.transaction = transaction;
+    await next();
+});
+
+router.param('accountId', async (id, ctx, next) => {
+    const account = await Account.findById(id);
+    ctx.account = account;
+    await next();
+});
+
+router.get('/hook', (req, res) => {
     console.log("HOOK -- GET", req.query);
 });
 
-app.post('/hook', (req, res) => {
+router.post('/hook', (req, res) => {
     console.log("HOOK -- POST", req.body);
 });
 
-app.post('/accesstoken', users.getAccessToken);
+router.post('/users/accesstoken', users.getAccessToken);
+router.get('/users/:userId/accounts', users.getAccounts);
 
-app.get('/categories', categories.getAll);
-app.post('/categories', categories.save);
-app.put('/categories', categories.update);
-// app.delete('/categories', categories.update);
-app.get('/categories/:categoryId', categories.get);
+router.get('/users/:userId/transactions/:accountId', transactions.getTransactionsForAccount);
 
-app.get('/user/:userId/accounts', users.getAccounts);
 
-app.param('categoryId', (req, res, next, id) => {
-    Category.findById(id).then(data => {
-        req.category = data;
-        next();
-    }).catch(error => {
-        next(error);
-    });
-});
-
-app.param('userId', (req, res, next, id) => {
-    User.findById(id).then(data => {
-        req.user = data;
-        next();
-    }).catch(error => {
-        next(error);
-    });
-});
-
-app.param('transactionId', (req, res, next, id) => {
-    Transaction.findById(id).then(data => {
-        req.transaction = data;
-        next();
-    }).catch(error => {
-        next(error);
-    });
-});
-
-app.param('accountId', (req, res, next, id) => {
-    Account.findById(id).then(data => {
-        req.account = data;
-        next();
-    }).catch(error => {
-        next(error);
-    });
-});
+app.use(router.routes());
+app.use(router.allowedMethods());
 
 //LISTEN
 try {
     https.createServer({
         key: fs.readFileSync('finance_app.key'),
         cert: fs.readFileSync('finance_app.cert')
-    }, app).listen(3000);
+    }, app.callback()).listen(3000);
 } catch (error) {
-    console.log("ERROR", error);
+    console.log("HTTPS CREATE SERVER ERROR", error);
     app.listen(PORT, () => {
       console.log("App listening on 3000");
     });
